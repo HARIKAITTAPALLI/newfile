@@ -1,53 +1,50 @@
-package com.te.jdbcfile;
-import java.io.FileInputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
+package com.te.HibernateAssignment.bean;
 
+import java.util.Scanner;
 
-public class Delete 
-{
-	
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 
-		public static void main(String[] args) {
-			Connection connection=null;
-			 java.sql.Statement statement=null;
-			try {
-				FileInputStream fileInputStream=new FileInputStream("d2.properties");
+public class Delete {
+	public static void readdeleteData() {
+		Scanner sc = new Scanner(System.in);
+		EntityManagerFactory factory=null;
+		EntityManager manager=null;
+		EntityTransaction transaction=null;
+		System.out.println("Enter the Roll Number you want to delete: ");
+		int rn = sc.nextInt();
+		
+		try {
+			factory = Persistence.createEntityManagerFactory("studentData");
+			manager = factory.createEntityManager();
+			transaction = manager.getTransaction();
+			transaction.begin();
+
+			String deleteData="delete Student where RollNo= :rn ";
+			Query query= manager.createQuery(deleteData);
+			query.setParameter("rn", rn);
+			int result=query.executeUpdate();
 			
-			Properties properties=new Properties();
-			properties.load(fileInputStream);
+			if (result!=0) {
+				System.out.println("Data Deleted Successfully");
+			}
 			
-			 connection=DriverManager.getConnection(properties.getProperty("dburl"), "root", "emp");
-		 statement=connection.createStatement();
-		int result=statement.executeUpdate(properties.getProperty("query3"));
-		if(result!=0)
-		{
-			 System.out.println(result+" no of rows ");
-			 System.out.println("deleted  successfully");
-		}
-			}catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}finally {
-				try {
-				if(connection!=null)
-				{
-					
-						connection.close();
-					}
-				if(statement!=null)
-				{
-					statement.close();
-				}
-				}
-				catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			if (manager != null) {
+				manager.close();
+			}
+			if (factory != null) {
+				factory.close();
 			}
 	}
+	}
 
-
+}
